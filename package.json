@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "axios": "^0.21.1",
+    "ccxt": "^1.46.68"
+  },
+  "devDependencies": {
+    "prettier": "^2.2.1"
+  }
+}
