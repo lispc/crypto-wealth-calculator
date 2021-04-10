@@ -5,7 +5,7 @@ const axios = require("axios");
 const localCurrency = "CNY";
 const minUSDTValueToDisplay = 10;
 
-let ticker;
+let tickers;
 let localCurrencyRatio;
 
 function sleep(ms) {
@@ -30,8 +30,8 @@ async function getAddrBalance(coin, addr) {
 async function getBalanceOfExchange(exchangeName, params) {
   const ex = new ccxt[exchangeName](params);
 
-  ticker = await ex.fetchTickers();
-  ticker["USDT/USDT"] = { last: 1 };
+  tickers = await ex.fetchTickers();
+  tickers["USDT/USDT"] = { last: 1 };
 
   const balance = await ex.fetchBalance();
   const total = balance["total"];
@@ -39,7 +39,9 @@ async function getBalanceOfExchange(exchangeName, params) {
   for (const coin in total) {
     const amount = total[coin];
     if (amount != 0) {
-      const coinBalance = amount * (ticker[coin + "/USDT"]?.last || 0);
+      const ticker = tickers[coin + "/USDT"];
+      const price = ticker ? ticker.last : 0;
+      const coinBalance = amount * price;
       if (coinBalance > minUSDTValueToDisplay) {
         console.log(`${exchangeName} ${coin}: ${amount} = ${coinBalance} USDT`);
       }
@@ -57,7 +59,7 @@ async function fetchCurrencyRatio() {
     }
     const pair = `USD${localCurrency}`;
     const url = `https://www.freeforexapi.com/api/live?pairs=${pair}`;
-    localCurrencyRatio = (await axios.get(url)).data?.rates[pair]?.rate || 0;
+    localCurrencyRatio = (await axios.get(url)).data.rates[pair].rate || 0;
     console.log("localCurrencyRatio", localCurrencyRatio);
   } catch (e) {
     console.log("fetch currency ratio failed", e);
@@ -78,7 +80,9 @@ async function main() {
   for (const coin in config.addresses) {
     for (const addr of config.addresses[coin]) {
       const amount = await getAddrBalance(coin, addr);
-      const balance = amount * (ticker[coin + "/USDT"]?.last || 0);
+      const ticker = tickers[coin + "/USDT"];
+      const price = ticker ? ticker.last : 0;
+      const balance = amount * price;
       total += balance;
       if (balance > minUSDTValueToDisplay) {
         console.log(`wallet ${coin}: ${amount} = ${balance} USDT`);
