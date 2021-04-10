@@ -61,6 +61,7 @@ async function fetchCurrencyRatio() {
     const url = `https://www.freeforexapi.com/api/live?pairs=${pair}`;
     localCurrencyRatio = (await axios.get(url)).data.rates[pair].rate || 0;
     console.log("localCurrencyRatio", localCurrencyRatio);
+    console.log("");
   } catch (e) {
     console.log("fetch currency ratio failed", e);
     localCurrencyRatio = 0;
@@ -78,18 +79,23 @@ async function main() {
     console.log("");
   }
   for (const coin in config.addresses) {
+    let coinTotal = 0;
+    const ticker = tickers[coin + "/USDT"];
+    const price = ticker ? ticker.last : 0;
     for (const addr of config.addresses[coin]) {
       const amount = await getAddrBalance(coin, addr);
-      const ticker = tickers[coin + "/USDT"];
-      const price = ticker ? ticker.last : 0;
+      coinTotal += amount;
       const balance = amount * price;
-      total += balance;
       if (balance > minUSDTValueToDisplay) {
         console.log(`wallet ${coin}: ${amount} = ${balance} USDT`);
       }
       await sleep(1000);
     }
+    console.log(
+      `wallet ${coin} Total: ${coinTotal} = ${coinTotal * price} USDT`
+    );
     console.log("");
+    total += coinTotal * price;
   }
 
   console.log(`Total: ${total} USDT`);

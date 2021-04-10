@@ -1,7 +1,10 @@
 {
   "dependencies": {
     "axios": "^0.21.1",
-    "ccxt": "^1.46.68"
+    "ccxt": "^1.46.68",
+    "dotenv": "^8.2.0",
+    "node-telegram-bot-api": "^0.52.0",
+    "shelljs": "^0.8.4"
   },
   "devDependencies": {
     "prettier": "^2.2.1"
